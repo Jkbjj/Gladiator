@@ -1,20 +1,55 @@
 import random
 import time
+from random import randint
+
 
 class Gracz:
-    def __init__(self, imię, klasa):
-        self.imię = imię
+    def __init__(self, imie, klasa):
+        self.imie = imie
         self.klasa = klasa
-        self.statystyki = {"zdrowie" : 100, "kasa": 1000}
+        self.statystyki = {"wygrane": 0, "przegrane": 0, "zdrowie" : 100, "kasa": 1000}
         if klasa == "Gladiator":
-            self.statystyki.update({"moc": 7, "zręczność": 4, "inteligencja": 2, "obrona":6})
+            self.statystyki.update({"moc": 7, "zrecznosc": 5, "inteligencja": 3, "obrona":5})
         elif klasa == "Zwiadowca":
-            self.statystyki.update({"moc": 3, "zręczność": 7, "inteligencja": 4, "obrona":5})
+            self.statystyki.update({"moc": 3, "zrecznosc": 7, "inteligencja": 5, "obrona": 5})
         elif klasa == "Mag":
-            self.statystyki.update({"moc": 2, "zręczność": 6, "inteligencja": 8, "obrona":4})
+            self.statystyki.update({"moc": 3, "zrecznosc": 5, "inteligencja": 7, "obrona":5})
+    def aktualizacja_statystyk_po_wygranej(self):
+        self.statystyki["wygrane"] += 1
+        self.statystyki['kasa'] += randint(10,35)
+        if self.klasa == "Gladiator":
+            self.statystyki['moc'] += 2 + random.randint(3,5)
+            self.statystyki['zrecznosc'] += 1 + random.randint(1,3)
+            self.statystyki['inteligencja'] += random.randint(1,3)
+            self.statystyki['obrona'] += 1 + random.randint(3,5)
+        elif self.klasa == "Zwiadowca":
+            self.statystyki['moc'] += random.randint(1,3)
+            self.statystyki['zrecznosc'] += 2 + random.randint(3,5)
+            self.statystyki['inteligencja'] += 1 + random.randint(2,4)
+            self.statystyki['obrona'] += 1 + random.randint(3,5)
+        elif self.klasa == "Mag":
+            self.statystyki['moc'] += random.randint(1,3)
+            self.statystyki['zrecznosc'] += 1 + random.randint(2,4)
+            self.statystyki['inteligencja'] += 2 + random.randint(3,5)
+            self.statystyki['obrona'] += random.randint(2,4)
+
 class Przeciwnik:
     def __init__(self):
-        self.statystyki = {"zdrowie": 40, "moc": 100, "zręczność": 4,"inteligencja": 4,"obrona": 4,}
+        self.statystyki = {"zdrowie": 40, "moc": 7, "zrecznosc": 4,"inteligencja": 4,"obrona": 4,}
+    def aktualizacja_statystyk_przeciwnika(self, gracz):
+        if gracz.statystyki['wygrane'] % 3 != 0:
+            self.statystyki['zdrowie'] = 100
+            self.statystyki['moc'] += random.randint(2, 4)
+            self.statystyki['zrecznosc'] += random.randint(1, 3)
+            self.statystyki['inteligencja'] +=  random.randint(1, 4)
+            self.statystyki['obrona'] +=  random.randint(2, 4)
+        else:
+            self.statystyki['zdrowie'] = 100
+            self.statystyki['moc'] += 4 + random.randint(2, 4)
+            self.statystyki['zrecznosc'] += 4 + random.randint(1, 3)
+            self.statystyki['inteligencja'] += 3 +  random.randint(1, 4)
+            self.statystyki['obrona'] += 3 + random.randint(1, 4)
+
 
 
 def przedmowa():
@@ -30,8 +65,8 @@ def przedmowa():
 
 #Gladiator podaje mi swoje imię
 def imie():
-    nazwagladiatora = str(input("Gladiatorze witam! Podaj swoję imię!: "))
-    return nazwagladiatora
+    nazwa_gladiatora = str(input("Gladiatorze witam! Podaj swoję imię!: "))
+    return nazwa_gladiatora
 #Mechanika klas będzie stworzona później
 def klasa():
     print("Graczu do wybooru są 3 klasy")
@@ -57,16 +92,16 @@ def klasa():
 
 # Funkcja menu zawiera ogólny zarys jest statyczna jej obsługa działa za pomocoś funkcji obsługa meny
 def menu(gracz, przeciwnik):
-    print("{} Witaj wśród Gladiatorów!".format(gracz.imię)," Twoja klasa to:",format(gracz.klasa) )
+    print("{} Witaj wśród Gladiatorów!".format(gracz.imie)," Twoja klasa to:",format(gracz.klasa) )
     print("arena - 1")
     print("sklep - 2")
     print("ekwipunek - 3")
     print("statystyki - 4")
     print("saldo - 5")
     print("zakończ grę - 6")
-    obsługa_menu(gracz, przeciwnik)
+    obsluga_menu(gracz, przeciwnik)
 # Funkcja obsługa menu nawiguje po menu i obsługuje mechanike poruszania się po menu
-def obsługa_menu(gracz, przeciwnik):
+def obsluga_menu(gracz, przeciwnik):
     while True:
         try:
             wybor = int(input("Gladiatorze: Jaką czynność chcesz wykonać? "))
@@ -131,14 +166,16 @@ def walka(gracz, przeciwnik):
         atak_gracza(gracz, przeciwnik)
         if przeciwnik.statystyki['zdrowie'] <= 0:
             print("Gratulację, wygrałeś walkę")
+            gracz.aktualizacja_statystyk_po_wygranej()
+            przeciwnik.aktualizacja_statystyk_przeciwnika(gracz)
             time.sleep(2)
-            przeciwnik.statystyki['zdrowie'] = 40
             regeneracja_zdrowia_wygrana(gracz)
             return
         time.sleep(2)
         atak_przeciwnika(gracz, przeciwnik)
         if gracz.statystyki['zdrowie'] <= 0:
             print("Zostałeś pokonany")
+            gracz.statystyki["przegrane"] += 1
             time.sleep(2)
             regeneracja_zdrowia_przegrana(gracz)
             return
@@ -146,26 +183,26 @@ def walka(gracz, przeciwnik):
 
 def liczenie_obrazen_gracza (gracz,przeciwnik):
     moc = gracz.statystyki["moc"]
-    zrecznosć = gracz.statystyki["zręczność"]
+    zrecznosc = gracz.statystyki["zrecznosc"]
     inteligencja = gracz.statystyki["inteligencja"]
     obrona = przeciwnik.statystyki["obrona"]
 
     if gracz.klasa == "Gladiator":
-        obrazenia = ((0.7 * moc) + (0.4 * zrecznosć) + (0.2 * inteligencja) - (0.6 * obrona)) * random.uniform(2, 3.5)
+        obrazenia = ((0.7 * moc) + (0.4 * zrecznosc) + (0.2 * inteligencja) -(0.7 * obrona)) * random.uniform(2, 3.5)
         return max(1, round(obrazenia))
-    elif gracz.klasa == "Zwiadowiec":
-        obrazenia = ((0.2 * moc) + (0.7 * zrecznosć) + (0.4 * inteligencja) - (0.6 * obrona)) * random.uniform(2, 3.5)
+    elif gracz.klasa == "Zwiadowca":
+        obrazenia = ((0.2 * moc) + (0.7 * zrecznosc) + (0.4 * inteligencja) -(0.7 * obrona)) * random.uniform(2, 3.5)
         return max(1, round(obrazenia))
     elif gracz.klasa == "Mag":
-        obrazenia = ((0.2 * moc) + (0.4 * zrecznosć) + (0.7 * inteligencja) - (0.6 * obrona)) * random.uniform(2, 3.5)
+        obrazenia = ((0.2 * moc) + (0.4 * zrecznosc) + (0.7 * inteligencja) -(0.7 * obrona)) * random.uniform(2, 3.5)
         return max(1, round(obrazenia))
 def liczenie_obrazen_przeciwnika (gracz,przeciwnik):
     moc = przeciwnik.statystyki["moc"]
-    zrecznosć = przeciwnik.statystyki["zręczność"]
+    zrecznosc = przeciwnik.statystyki["zrecznosc"]
     inteligencja = przeciwnik.statystyki["inteligencja"]
     obrona = gracz.statystyki["obrona"]
 
-    obrazenia_przeciwnika = ((0.5 * moc) + (0.5 * zrecznosć) + (0.4 * inteligencja) - (0.6 * obrona)) * random.uniform(2, 3.5)
+    obrazenia_przeciwnika = ((0.4 * moc) + (0.4 * zrecznosc) + (0.4 * inteligencja) -(0.6 * obrona)) * random.uniform(2, 3.25)
     return max(1, round(obrazenia_przeciwnika))
 def atak_gracza(gracz, przeciwnik):
     print("Wykonujesz atak")
@@ -180,7 +217,6 @@ def atak_przeciwnika(gracz, przeciwnik):
     print(f"Przeciwnik zadaje {obrazenia} obrażeń. Zdrowie gracza: {gracz.statystyki['zdrowie']}")
     return obrazenia
 def regeneracja_zdrowia_wygrana(gracz):
-
     koszt_uzdrowienie = random.randint(5,25)
     if gracz.statystyki['zdrowie'] == 100:
         print("Twoje zdrowie jest pełne nie musisz się leczyc! Gratulacje")
@@ -215,6 +251,7 @@ def regeneracja_zdrowia_przegrana(gracz):
         gracz.statystyki['zdrowie'] = 100
         print("Zostałeś wyleczony, z Twojego konta pobrano", koszt_uzdrowienie,"monet Twoje saldo to:", gracz.statystyki["kasa"])
         return
+
 
 
 
