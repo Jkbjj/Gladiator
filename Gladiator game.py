@@ -14,7 +14,7 @@ class Gracz:
             self.statystyki.update({"moc": 2, "zręczność": 6, "inteligencja": 8, "obrona":4})
 class Przeciwnik:
     def __init__(self):
-        self.statystyki = {"zdrowie": 40, "moc": 50, "zręczność": 4,"inteligencja": 4,"obrona": 4,}
+        self.statystyki = {"zdrowie": 40, "moc": 100, "zręczność": 4,"inteligencja": 4,"obrona": 4,}
 
 
 def przedmowa():
@@ -132,12 +132,15 @@ def walka(gracz, przeciwnik):
         if przeciwnik.statystyki['zdrowie'] <= 0:
             print("Gratulację, wygrałeś walkę")
             time.sleep(2)
+            przeciwnik.statystyki['zdrowie'] = 40
+            regeneracja_zdrowia_wygrana(gracz)
             return
         time.sleep(2)
         atak_przeciwnika(gracz, przeciwnik)
         if gracz.statystyki['zdrowie'] <= 0:
             print("Zostałeś pokonany")
             time.sleep(2)
+            regeneracja_zdrowia_przegrana(gracz)
             return
         time.sleep(2)
 
@@ -176,6 +179,44 @@ def atak_przeciwnika(gracz, przeciwnik):
     gracz.statystyki['zdrowie'] -= obrazenia
     print(f"Przeciwnik zadaje {obrazenia} obrażeń. Zdrowie gracza: {gracz.statystyki['zdrowie']}")
     return obrazenia
+def regeneracja_zdrowia_wygrana(gracz):
+
+    koszt_uzdrowienie = random.randint(5,25)
+    if gracz.statystyki['zdrowie'] == 100:
+        print("Twoje zdrowie jest pełne nie musisz się leczyc! Gratulacje")
+        return
+
+    print(f"Wygrałeś walkę, lecz ucierpoałeś, Twoje aktualne zdrowie wynosi {gracz.statystyki['zdrowie']}")
+    print("Koszt Twojego uzdrowienia wynosi: ",koszt_uzdrowienie)
+    if gracz.statystyki["kasa"] < koszt_uzdrowienie:
+        print("Nie stać Ciebie na uleczenie. Sprzedaj coś ze swojego ekwipunku i wylecz się w zakładce saldo!")
+        return
+    while True:
+        decyzja = input("Czy chcesz zregenerować zdrowie? (tak/nie) ").lower()
+        if decyzja == "tak":
+            gracz.statystyki['kasa'] -= koszt_uzdrowienie
+            gracz.statystyki['zdrowie'] = 100
+            print("Zostałeś wyleczon")
+            break
+        elif decyzja == "nie":
+            print("Twoje zdrowie nie zostało zregenerowane")
+            break
+        else:
+            print("Proszę wybrać tak lub nie")
+
+def regeneracja_zdrowia_przegrana(gracz):
+    koszt_uzdrowienie = random.randint(25, 50)
+    print("Przegrałeś walkę, Twoje zdrowie spadło do 0")
+    if gracz.statystyki["kasa"] < koszt_uzdrowienie:
+        print("Nie stać Ciebie na uleczenie. Sprzedaj coś ze swojego ekwipunku i wylecz się w zakładce saldo!")
+        return
+    else:
+        gracz.statystyki['kasa'] -= koszt_uzdrowienie
+        gracz.statystyki['zdrowie'] = 100
+        print("Zostałeś wyleczony, z Twojego konta pobrano", koszt_uzdrowienie,"monet Twoje saldo to:", gracz.statystyki["kasa"])
+        return
+
+
 
 
 def main():
