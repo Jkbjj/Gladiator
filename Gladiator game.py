@@ -49,7 +49,28 @@ class Przeciwnik:
             self.statystyki['zrecznosc'] += 4 + random.randint(1, 3)
             self.statystyki['inteligencja'] += 3 +  random.randint(1, 4)
             self.statystyki['obrona'] += 3 + random.randint(1, 4)
+class Boss():
+    def __init__(self):
+        self.statystyki = {"zdrowie": 300, "moc": 5, "zrecznosc": 4,"inteligencja": 3,"obrona": 3}
+    def aktualizacja_statystyk_bossa(self, gracz):
+        self.statystyki['zdrowie'] = round(gracz.statystyki['zdrowie'] * random.uniform(1.3,1.6))
+        self.statystyki['moc'] = round(gracz.statystyki['moc'] * random.uniform(0.70,1.16))
+        self.statystyki['zrecznosc'] = round(gracz.statystyki['zrecznosc'] * random.uniform(0.75,1.10))
+        self.statystyki['inteligencja'] = round(gracz.statystyki['inteligencja'] * random.uniform(0.80,1.10))
+        self.statystyki['obrona'] = round(gracz.statystyki['obrona'] * random.uniform(0.75,1.10))
+class Rozdzka():
+    def __init__(self, inteligencja):
+        self.inteligencja = inteligencja
 
+class Zbroja():
+    def __init__(self, obrona):
+        self.obrona = obrona
+class Miecz():
+    def __init__(self, moc):
+        self.moc = moc
+class Kusza():
+    def __init__(self, zrecznosc):
+        self.zrecznosc = zrecznosc
 
 
 def przedmowa():
@@ -91,25 +112,24 @@ def klasa():
             print("Nieprawidłowe danej wejściowe, wybierz liczbę  z przedziału 1-3 ")
 
 # Funkcja menu zawiera ogólny zarys jest statyczna jej obsługa działa za pomocoś funkcji obsługa meny
-def menu(gracz, przeciwnik):
+def menu(gracz, przeciwnik, boss):
     print("{} Witaj wśród Gladiatorów!".format(gracz.imie)," Twoja klasa to:",format(gracz.klasa) )
     print("arena - 1")
     print("sklep - 2")
     print("ekwipunek - 3")
     print("statystyki - 4")
-    print("saldo - 5")
-    print("zakończ grę - 6")
-    obsluga_menu(gracz, przeciwnik)
+    print("zakończ grę - 5")
+    obsluga_menu(gracz, przeciwnik, boss)
 # Funkcja obsługa menu nawiguje po menu i obsługuje mechanike poruszania się po menu
-def obsluga_menu(gracz, przeciwnik):
+def obsluga_menu(gracz, przeciwnik, boss):
     while True:
         try:
             wybor = int(input("Gladiatorze: Jaką czynność chcesz wykonać? "))
             if wybor == 1:
-                arena(gracz, przeciwnik)
+                arena(gracz, przeciwnik, boss)
                 break
             elif wybor == 2:
-                sklep()
+                sklep(gracz)
                 break
             elif wybor == 3 :
                 ekwipunek()
@@ -117,32 +137,110 @@ def obsluga_menu(gracz, przeciwnik):
             elif wybor == 4 :
                 statystyki(gracz)
                 break
-            elif wybor == 5 :
-                saldo(gracz)
-                break
-            elif wybor == 6:
+            elif wybor == 5:
                 print("Dziękuję za grę!")
                 exit()
             else:
-                print("Podano nieprawidłową wartość! Wybierz wartość od 1 do 6")
+                print("Podano nieprawidłową wartość! Wybierz wartość od 1 do 5")
         except ValueError:
             print("Należy wprowadzić liczbę")
 
 # Arena jest miejscem, gdzie toczą się walki. Korzysta ona z funkcji walka, aby wywołąć mechanikę walki
-def arena(gracz, przeciwnik):
+def arena(gracz, przeciwnik, boss):
     print("Witaj na arenie! Gdzie walka toczy się do ostatniej krwi")
     while True:
         decyzja = input("Czy chcesz podjąć walkę(tak/nie) ").lower()
-        if decyzja == "tak":
-            walka(gracz,przeciwnik)
+        if decyzja == "tak" and (gracz.statystyki['wygrane'] % 5 != 0 or gracz.statystyki['wygrane'] == 0) :
+            print("Walczysz z przeciwnikiem")
+            walka(gracz, przeciwnik)
+            break
+        elif decyzja == "tak":
+            print("Walczusz z bossem")
+            boss.aktualizacja_statystyk_bossa(gracz)
+            walka(gracz,boss)
             break
         elif decyzja == "nie":
             return
         else:
             print("Należy wybrac tak lub nie")
 #Sklep będzie trzeba rozbudować na razie ejst to zarys
-def sklep():
-    print("Witaj w sklepie! z poniższego menu możesz wybrać co chcesz zakupić")
+def sklep(gracz):
+    print("Witaj w sklepie! aby zobaczyć dostępny asortyment wejdz w wybraną kategorie")
+    print("Rozdzki - 1")
+    print("Miecze - 2")
+    print("Zbroje - 3")
+    print("Kusze - 4")
+    print("Powrot do menu - 5")
+    obsluga_sklepu(gracz)
+def obsluga_sklepu(gracz):
+    while True:
+        try:
+            wybor = int(input("Wybieram: "))
+            if wybor == 1:
+                rozdzki(gracz)
+            elif wybor == 2:
+                miecze(gracz)
+            elif wybor == 3:
+                zbroje(gracz)
+            elif wybor == 4:
+                kusze(gracz)
+            elif wybor == 5:
+                break
+            else:
+                print("Podano nieprawidłową wartość! Wybierz wartość od 1 do 5")
+        except ValueError:
+            print("Należy wprowadzić liczbę")
+def rozdzki(gracz):
+    print("Poniżej znajdują się dostępne różdzki")
+    inteligencje = [
+    max(round(gracz.statystyki['inteligencja'] * 0.1 * random.uniform(0.8,1.2)),1),
+    max(round(gracz.statystyki['inteligencja'] * 0.2 * random.uniform(0.8,1.2)),2),
+    max(round(gracz.statystyki['inteligencja'] * 0.3 * random.uniform(0.8,1.2)), 3)
+    ]
+    for i, inteligencja in enumerate(inteligencje, start = 1):
+        rozdzka = Rozdzka(inteligencja)
+        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" Różdzka{i} - inteligencja {rozdzka.inteligencja} koszt {koszt} ")
+def miecze(gracz):
+    print("Poniżej znajdują się dostępne miecze")
+    moce = [
+        max(round(gracz.statystyki['moc'] * 0.1 * random.uniform(0.8, 1.2)), 1),
+        max(round(gracz.statystyki['moc'] * 0.2 * random.uniform(0.8, 1.2)), 2),
+        max(round(gracz.statystyki['moc'] * 0.3 * random.uniform(0.8, 1.2)), 3)
+    ]
+    for i, moc in enumerate(moce, start = 1):
+        miecz = Miecz(moc)
+        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" Miecz {i} - moc {miecz.moc} koszt {koszt} ")
+def zbroje(gracz):
+    print("Poniżej znajdują się dostępne zbroje")
+    obrony = [
+        max(round(gracz.statystyki['obrona'] * 0.1 * random.uniform(0.8, 1.2)), 1),
+        max(round(gracz.statystyki['obrona'] * 0.2 * random.uniform(0.8, 1.2)), 2),
+        max(round(gracz.statystyki['obrona'] * 0.3 * random.uniform(0.8, 1.2)), 3)
+    ]
+    for i, obrona in enumerate(obrony, start = 1):
+        zbroja = Zbroja(obrona)
+        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" Zbroja {i} - obrona {zbroja.obrona} koszt {koszt} ")
+def kusze(gracz):
+    print("Poniżej znajdują się dostępne kusze")
+    zrecznosci = [
+        max(round(gracz.statystyki['zrecznosc'] * 0.1 * random.uniform(0.8, 1.2)), 1),
+        max(round(gracz.statystyki['zrecznosc'] * 0.2 * random.uniform(0.8, 1.2)), 2),
+        max(round(gracz.statystyki['zrecznosc'] * 0.3 * random.uniform(0.8, 1.2)), 3)
+    ]
+    for i, zrecznosc in enumerate(zrecznosci, start = 1):
+        kusza = Kusza(zrecznosc)
+        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" kusza {i} - zrecznosc {kusza.zrecznosc} koszt {koszt} ")
+def losowanie_przedmiotów(gracz, moce):
+
+    for i, inteligencja in enumerate(moce, start = 1):
+        rozdzka = Rozdzka(inteligencja)
+        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" Różdzka{i} - inteligencja {rozdzka.inteligencja} koszt {koszt} ")
+
 #ekwipunek będzie trzeba rozrysować
 def ekwipunek():
     print("Poniżej znajduję się Twój ekwipunek")
@@ -167,7 +265,7 @@ def walka(gracz, przeciwnik):
         if przeciwnik.statystyki['zdrowie'] <= 0:
             print("Gratulację, wygrałeś walkę")
             gracz.aktualizacja_statystyk_po_wygranej()
-            przeciwnik.aktualizacja_statystyk_przeciwnika(gracz)
+            aktualizacja_statystyk_przeciwnika_po_walce(gracz, przeciwnik)
             time.sleep(2)
             regeneracja_zdrowia_wygrana(gracz)
             return
@@ -175,6 +273,7 @@ def walka(gracz, przeciwnik):
         atak_przeciwnika(gracz, przeciwnik)
         if gracz.statystyki['zdrowie'] <= 0:
             print("Zostałeś pokonany")
+            przeciwnik.statystyki['zdrowie'] = 70
             gracz.statystyki["przegrane"] += 1
             time.sleep(2)
             regeneracja_zdrowia_przegrana(gracz)
@@ -202,7 +301,7 @@ def liczenie_obrazen_przeciwnika (gracz,przeciwnik):
     inteligencja = przeciwnik.statystyki["inteligencja"]
     obrona = gracz.statystyki["obrona"]
 
-    obrazenia_przeciwnika = ((0.4 * moc) + (0.4 * zrecznosc) + (0.4 * inteligencja) -(0.6 * obrona)) * random.uniform(2, 3.25)
+    obrazenia_przeciwnika = ((0.6 * moc) + (0.5 * zrecznosc) + (0.45 * inteligencja) -(0.6 * obrona)) * random.uniform(2, 3.35)
     return max(1, round(obrazenia_przeciwnika))
 def atak_gracza(gracz, przeciwnik):
     print("Wykonujesz atak")
@@ -225,7 +324,7 @@ def regeneracja_zdrowia_wygrana(gracz):
     print(f"Wygrałeś walkę, lecz ucierpoałeś, Twoje aktualne zdrowie wynosi {gracz.statystyki['zdrowie']}")
     print("Koszt Twojego uzdrowienia wynosi: ",koszt_uzdrowienie)
     if gracz.statystyki["kasa"] < koszt_uzdrowienie:
-        print("Nie stać Ciebie na uleczenie. Sprzedaj coś ze swojego ekwipunku i wylecz się w zakładce saldo!")
+        print("Nie stać Ciebie na uleczenie!")
         return
     while True:
         decyzja = input("Czy chcesz zregenerować zdrowie? (tak/nie) ").lower()
@@ -244,12 +343,19 @@ def regeneracja_zdrowia_przegrana(gracz):
     koszt_uzdrowienie = random.randint(25, 50)
     print("Przegrałeś walkę, Twoje zdrowie spadło do 0")
     if gracz.statystyki["kasa"] < koszt_uzdrowienie:
-        print("Nie stać Ciebie na uleczenie. Sprzedaj coś ze swojego ekwipunku i wylecz się w zakładce saldo!")
-        return
+        print("Nie stać Ciebie na uleczenie. Game Over!")
+        exit()
     else:
         gracz.statystyki['kasa'] -= koszt_uzdrowienie
         gracz.statystyki['zdrowie'] = 100
         print("Zostałeś wyleczony, z Twojego konta pobrano", koszt_uzdrowienie,"monet Twoje saldo to:", gracz.statystyki["kasa"])
+        return
+def aktualizacja_statystyk_przeciwnika_po_walce(gracz, przeciwnik):
+    przeciwnik_to_boss = isinstance(przeciwnik, Boss)
+    if przeciwnik_to_boss:
+        return
+    else:
+        przeciwnik.aktualizacja_statystyk_przeciwnika(gracz)
         return
 
 
@@ -262,6 +368,7 @@ def main():
     imie_gracza = imie()
     gracz = Gracz(imie_gracza, klasa_gracza)
     przeciwnik = Przeciwnik()
+    boss = Boss()
     while True:
-        menu(gracz, przeciwnik)
+        menu(gracz, przeciwnik, boss)
 main()
