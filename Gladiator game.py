@@ -7,13 +7,20 @@ class Gracz:
     def __init__(self, imie, klasa):
         self.imie = imie
         self.klasa = klasa
+        self.rozdzka = 0
+        self.miecz = 5
+        self.zbroja = 0
+        self.kusza =  0
         self.statystyki = {"wygrane": 0, "przegrane": 0, "zdrowie" : 100, "kasa": 1000}
         if klasa == "Gladiator":
-            self.statystyki.update({"moc": 7, "zrecznosc": 5, "inteligencja": 3, "obrona":5})
+            self.statystyki.update({"moc": 7 + self.miecz, "zrecznosc": 5 + self.kusza,
+            "inteligencja": 3 + self.rozdzka, "obrona":5 + self.zbroja})
         elif klasa == "Zwiadowca":
-            self.statystyki.update({"moc": 3, "zrecznosc": 7, "inteligencja": 5, "obrona": 5})
+            self.statystyki.update({"moc": 3 + self.miecz, "zrecznosc": 7 + self.kusza,
+            "inteligencja": 5 + self.rozdzka, "obrona": 5 + self.zbroja})
         elif klasa == "Mag":
-            self.statystyki.update({"moc": 3, "zrecznosc": 5, "inteligencja": 7, "obrona":5})
+            self.statystyki.update({"moc": 3 + self.miecz, "zrecznosc": 5 + self.kusza,
+            "inteligencja": 7 + self.rozdzka, "obrona":5 + self.zbroja})
     def aktualizacja_statystyk_po_wygranej(self):
         self.statystyki["wygrane"] += 1
         self.statystyki['kasa'] += randint(10,35)
@@ -45,15 +52,15 @@ class Przeciwnik:
             self.statystyki['obrona'] +=  random.randint(2, 4)
         else:
             self.statystyki['zdrowie'] = 100
-            self.statystyki['moc'] += 4 + random.randint(2, 4)
+            self.statystyki['moc'] += 5 + random.randint(2, 4)
             self.statystyki['zrecznosc'] += 4 + random.randint(1, 3)
             self.statystyki['inteligencja'] += 3 +  random.randint(1, 4)
-            self.statystyki['obrona'] += 3 + random.randint(1, 4)
+            self.statystyki['obrona'] += 4 + random.randint(1, 4)
 class Boss():
     def __init__(self):
         self.statystyki = {"zdrowie": 300, "moc": 5, "zrecznosc": 4,"inteligencja": 3,"obrona": 3}
     def aktualizacja_statystyk_bossa(self, gracz):
-        self.statystyki['zdrowie'] = round(gracz.statystyki['zdrowie'] * random.uniform(1.3,1.6))
+        self.statystyki['zdrowie'] = round(gracz.statystyki['zdrowie'] * random.uniform(1.2,1.6))
         self.statystyki['moc'] = round(gracz.statystyki['moc'] * random.uniform(0.70,1.16))
         self.statystyki['zrecznosc'] = round(gracz.statystyki['zrecznosc'] * random.uniform(0.75,1.10))
         self.statystyki['inteligencja'] = round(gracz.statystyki['inteligencja'] * random.uniform(0.80,1.10))
@@ -132,7 +139,7 @@ def obsluga_menu(gracz, przeciwnik, boss):
                 sklep(gracz)
                 break
             elif wybor == 3 :
-                ekwipunek()
+                ekwipunek(gracz)
                 break
             elif wybor == 4 :
                 statystyki(gracz)
@@ -165,15 +172,13 @@ def arena(gracz, przeciwnik, boss):
             print("Należy wybrac tak lub nie")
 #Sklep będzie trzeba rozbudować na razie ejst to zarys
 def sklep(gracz):
-    print("Witaj w sklepie! aby zobaczyć dostępny asortyment wejdz w wybraną kategorie")
-    print("Rozdzki - 1")
-    print("Miecze - 2")
-    print("Zbroje - 3")
-    print("Kusze - 4")
-    print("Powrot do menu - 5")
-    obsluga_sklepu(gracz)
-def obsluga_sklepu(gracz):
     while True:
+        print("Witaj w sklepie! aby zobaczyć dostępny asortyment wejdz w wybraną kategorie")
+        print("Rozdzki - 1")
+        print("Miecze - 2")
+        print("Zbroje - 3")
+        print("Kusze - 4")
+        print("Powrot do menu - 5")
         try:
             wybor = int(input("Wybieram: "))
             if wybor == 1:
@@ -190,60 +195,91 @@ def obsluga_sklepu(gracz):
                 print("Podano nieprawidłową wartość! Wybierz wartość od 1 do 5")
         except ValueError:
             print("Należy wprowadzić liczbę")
-def rozdzki(gracz):
-    print("Poniżej znajdują się dostępne różdzki")
-    inteligencje = [
-    max(round(gracz.statystyki['inteligencja'] * 0.1 * random.uniform(0.8,1.2)),1),
-    max(round(gracz.statystyki['inteligencja'] * 0.2 * random.uniform(0.8,1.2)),2),
-    max(round(gracz.statystyki['inteligencja'] * 0.3 * random.uniform(0.8,1.2)), 3)
-    ]
-    for i, inteligencja in enumerate(inteligencje, start = 1):
-        rozdzka = Rozdzka(inteligencja)
-        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
-        print(f" Różdzka{i} - inteligencja {rozdzka.inteligencja} koszt {koszt} ")
-def miecze(gracz):
-    print("Poniżej znajdują się dostępne miecze")
-    moce = [
-        max(round(gracz.statystyki['moc'] * 0.1 * random.uniform(0.8, 1.2)), 1),
-        max(round(gracz.statystyki['moc'] * 0.2 * random.uniform(0.8, 1.2)), 2),
-        max(round(gracz.statystyki['moc'] * 0.3 * random.uniform(0.8, 1.2)), 3)
-    ]
-    for i, moc in enumerate(moce, start = 1):
-        miecz = Miecz(moc)
-        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
-        print(f" Miecz {i} - moc {miecz.moc} koszt {koszt} ")
-def zbroje(gracz):
-    print("Poniżej znajdują się dostępne zbroje")
-    obrony = [
-        max(round(gracz.statystyki['obrona'] * 0.1 * random.uniform(0.8, 1.2)), 1),
-        max(round(gracz.statystyki['obrona'] * 0.2 * random.uniform(0.8, 1.2)), 2),
-        max(round(gracz.statystyki['obrona'] * 0.3 * random.uniform(0.8, 1.2)), 3)
-    ]
-    for i, obrona in enumerate(obrony, start = 1):
-        zbroja = Zbroja(obrona)
-        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
-        print(f" Zbroja {i} - obrona {zbroja.obrona} koszt {koszt} ")
-def kusze(gracz):
-    print("Poniżej znajdują się dostępne kusze")
-    zrecznosci = [
-        max(round(gracz.statystyki['zrecznosc'] * 0.1 * random.uniform(0.8, 1.2)), 1),
-        max(round(gracz.statystyki['zrecznosc'] * 0.2 * random.uniform(0.8, 1.2)), 2),
-        max(round(gracz.statystyki['zrecznosc'] * 0.3 * random.uniform(0.8, 1.2)), 3)
-    ]
-    for i, zrecznosc in enumerate(zrecznosci, start = 1):
-        kusza = Kusza(zrecznosc)
-        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
-        print(f" kusza {i} - zrecznosc {kusza.zrecznosc} koszt {koszt} ")
-def losowanie_przedmiotów(gracz, moce):
 
-    for i, inteligencja in enumerate(moce, start = 1):
-        rozdzka = Rozdzka(inteligencja)
-        koszt = i * round(0.02 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
-        print(f" Różdzka{i} - inteligencja {rozdzka.inteligencja} koszt {koszt} ")
+def rozdzki(gracz):
+    koszt_przedmiotow, wartosci_statystyk = generowanie_przedmiotow(gracz, Rozdzka, "inteligencja")
+    zakup_przedmiotow(gracz,koszt_przedmiotow, wartosci_statystyk, "rozdzka" )
+def miecze(gracz):
+    koszt_przedmiotow, wartosci_statystyk = generowanie_przedmiotow(gracz, Miecz, "moc")
+    zakup_przedmiotow(gracz,koszt_przedmiotow, wartosci_statystyk, "miecz" )
+def zbroje(gracz):
+    koszt_przedmiotow, wartosci_statystyk = generowanie_przedmiotow(gracz, Zbroja, "obrona")
+    zakup_przedmiotow(gracz,koszt_przedmiotow, wartosci_statystyk, "zbroja" )
+def kusze(gracz):
+    koszt_przedmiotow, wartosci_statystyk = generowanie_przedmiotow(gracz, Kusza, "zrecznosc")
+    zakup_przedmiotow(gracz,koszt_przedmiotow, wartosci_statystyk, "kusza" )
+
+def generowanie_przedmiotow (gracz, klasa_przedmiotu, statystyka):
+    print("Poniżej znajdują się statystyki przedmiotów")
+    wartosci = [
+        max(round(gracz.statystyki[statystyka] * 0.1 * random.uniform(0.8, 1.2)), 1),
+        max(round(gracz.statystyki[statystyka] * 0.2 * random.uniform(0.8, 1.2)), 2),
+        max(round(gracz.statystyki[statystyka] * 0.3 * random.uniform(0.8, 1.2)), 3)
+    ]
+    koszt_przedmiotow = []
+    wartosci_statystyk = []
+    for i, wartosc in enumerate(wartosci, start = 1):
+        przedmiot = klasa_przedmiotu(wartosc)
+        koszt = i * round(0.025 * gracz.statystyki['kasa'] * random.uniform(0.7,1.3))
+        print(f" {klasa_przedmiotu.__name__}{i} - {statystyka} {wartosc} koszt {koszt} ")
+        koszt_przedmiotow.append(koszt)
+        wartosci_statystyk.append(wartosc)
+    return  koszt_przedmiotow, wartosci_statystyk
+def zakup_przedmiotow(gracz, koszt_przedmiotow , wartosci_statystyk, przedmiot):
+    while True:
+        try:
+            wybor = int(input("Aby zakupić wybrany przedmiot wybierz (1-3). Aby wyjść klknij (4)  "))
+            if wybor == 1:
+                if gracz.statystyki["kasa"] < koszt_przedmiotow[0]:
+                    print("Nie masz wystarczającej liczby pieniędzy")
+                    break
+                elif getattr(gracz, przedmiot) >= wartosci_statystyk[0]:
+                    print("Masz już lepszy przedmiot")
+                    break
+                else:
+                    setattr(gracz, przedmiot, wartosci_statystyk[0])
+                    gracz.statystyki['kasa'] -= koszt_przedmiotow[0]
+                    print("Gratulacje zakupiłeś przedmiot")
+                    break
+            elif wybor == 2:
+                if gracz.statystyki["kasa"] < koszt_przedmiotow[1]:
+                    print("Nie masz wystarczającej liczby pieniędzy")
+                    break
+                elif getattr(gracz, przedmiot) >= wartosci_statystyk[1]:
+                    print("Masz już lepszy przedmiot")
+                    break
+                else:
+                    setattr(gracz, przedmiot, wartosci_statystyk[1])
+                    gracz.statystyki['kasa'] -= koszt_przedmiotow[1]
+                    print("Gratulacje zakupiłeś przedmiot")
+            elif wybor == 3:
+                if gracz.statystyki["kasa"] < koszt_przedmiotow[2]:
+                    print("Nie masz wystarczającej liczby pieniędzy")
+                    break
+                elif getattr(gracz, przedmiot) >= wartosci_statystyk[2]:
+                    print("Masz już lepszy przedmiot")
+                    break
+                else:
+                    setattr(gracz, przedmiot, wartosci_statystyk[2])
+                    gracz.statystyki['kasa'] -= koszt_przedmiotow[2]
+                    print("Gratulacje zakupiłeś przedmiot")
+                    break
+            elif wybor == 4:
+                break
+            else:
+                print("Wybierz liczbę z zakresu 1-4")
+        except ValueError:
+            print("Należy wybrać wartość liczbową")
+
 
 #ekwipunek będzie trzeba rozrysować
-def ekwipunek():
+def ekwipunek(gracz):
     print("Poniżej znajduję się Twój ekwipunek")
+    print(f" Rozdzka - inteligencja - {gracz.rozdzka}")
+    print(f" Miecz - moc - {gracz.miecz}")
+    print(f" Zbroja - obrona - {gracz.zbroja}")
+    print(f" Kusza - zrecznosc - {gracz.kusza}")
+    input("Aby powrócić do menu głównego kliknij dowolny klawisz: ")
 #Statystyki, pokazują aktualne staty gracza, po stworzeniu klas będzie trzeba ją zmodyfikować
 def statystyki(gracz):
     print("Poniżej znajdują się Twoje statystyki")
