@@ -2,49 +2,87 @@ import time
 import random
 from przeciwnik import Przeciwnik, Boss
 
-def arena(gracz, przeciwnik, boss):
-    print("Witaj na arenie! Gdzie walka toczy się do ostatniej krwi")
-    while True:
-        decyzja = input("Czy chcesz podjąć walkę(tak/nie) ").lower()
-        if decyzja == "tak":
-            if (gracz.statystyki['wygrane'] % 5 != 0 or gracz.statystyki['wygrane'] == 0):
-                print("Walczysz z przeciwnikiem")
-                walka(gracz, przeciwnik)
-                break
+class Walka():
+    def __init__(self, gracz, przeciwnik):
+        self.gracz = gracz
+        self.przeciwnik = przeciwnik
+
+    def fight (self):
+        print("Rozpoczyna się walka do ostatniej krwi!")
+        print(f"Twoje zdrowie: {self.gracz.statystyki['zdrowie']}, Zdrowie przeciwnika: {self.przeciwnik.statystyki['zdrowie']}")
+        while self.przeciwnik.statystyki['zdrowie'] > 0 and self.gracz.statystyki['zdrowie'] >0 :
+            self.atak_gracza()
+            if self.przeciwnik.statystyki['zdrowie'] <= 0:
+                print("Gratulację, wygrałeś walkę")
+                self.gracz.aktualizacja_statystyk_po_wygranej()
+                self.aktualizacja_statystyk_przeciwnika_po_walce()
+                time.sleep(2)
+                self.regeneracja_zdrowia("Wygrana")
+                return
+            time.sleep(2)
+            self.atak_przeciwnika()
+            if self.gracz.statystyki['zdrowie'] <= 0:
+                print("Zostałeś pokonany")
+                self.przeciwnik.statystyki['zdrowie'] = 0.7 * self.przeciwnik.statystyki['max_zdrowie']
+                self.gracz.statystyki["przegrane"] += 1
+                time.sleep(2)
+                self.regeneracja_zdrowia("Przegrana")
+                return
+            time.sleep(2)
+    def liczenie_obrazen(self,atakujacy, broniacy, klasa=None):
+        return liczenie_obrazen(atakujacy, broniacy, klasa)
+    def atak_gracza(self):
+        print("Wykonujesz atak")
+        obrazenia = self.liczenie_obrazen(self.gracz,self.przeciwnik, self.gracz.klasa)
+        self.przeciwnik.statystyki['zdrowie'] -= obrazenia
+        print(f"Gracz zadaje {obrazenia} obrażeń. Zdrowie przeciwnika: {self.przeciwnik.statystyki['zdrowie']}")
+        return obrazenia
+    def atak_przeciwnika(self):
+        print("Przeciwnik wykonuje atak")
+        obrazenia = self.liczenie_obrazen(self.przeciwnik, self.gracz)
+        self.gracz.statystyki['zdrowie'] -= obrazenia
+        print(f"Przeciwnik zadaje {obrazenia} obrażeń. Zdrowie gracza: {self.gracz.statystyki['zdrowie']}")
+
+    def regeneracja_zdrowia(self, wynik):
+        max_zdrowie = self.gracz.statystyki['max_zdrowie']
+        if wynik == "Wygrana":
+            if max_zdrowie == self.gracz.statystyki['zdrowie']:
+                return
+            koszt_uzdrowienie = random.randint(5, 25)
+            print(f"Wygrałeś walkę, lecz ucierpoałeś, Twoje aktualne zdrowie wynosi {self.gracz.statystyki['zdrowie']}")
+            print("Koszt Twojego uzdrowienia wynosi: ", koszt_uzdrowienie)
+            if self.gracz.statystyki["kasa"] < koszt_uzdrowienie:
+                print("Nie stać Ciebie na uleczenie!")
+                return
+            while True:
+                decyzja = input("Czy chcesz zregenerować zdrowie? (tak/nie) ").lower()
+                if decyzja == "tak":
+                    self.gracz.statystyki['kasa'] -= koszt_uzdrowienie
+                    self.gracz.statystyki['zdrowie'] = max_zdrowie
+                    print("Zostałeś wyleczony")
+                    break
+                elif decyzja == "nie":
+                    print("Twoje zdrowie nie zostało zregenerowane")
+                    break
+                else:
+                    print("Proszę wybrać tak lub nie")
+        elif wynik == "Przegrana":
+            koszt_uzdrowienie = random.randint(25, 75)
+            if self.gracz.statystyki["kasa"] < koszt_uzdrowienie:
+                print("Nie stać Ciebie na uleczenie. Game Over!")
+                exit()
             else:
-                print("Walczusz z bossem")
-                boss.aktualizacja_statystyk_bossa(gracz)
-                walka(gracz,boss)
-                break
-        elif decyzja == "nie":
+                self.gracz.statystyki['kasa'] -= koszt_uzdrowienie
+                self.gracz.statystyki['zdrowie'] = max_zdrowie
+                print("Zostałeś wyleczony, z Twojego konta pobrano", koszt_uzdrowienie, "monet Twoje saldo to:",
+                      self.gracz.statystyki["kasa"])
+    def aktualizacja_statystyk_przeciwnika_po_walce(self):
+        self.przeciwnik_to_boss = isinstance(self.przeciwnik, Boss)
+        if self.przeciwnik_to_boss:
             return
         else:
-            print("Należy wybrac tak lub nie")
-
-def walka(gracz, przeciwnik):
-    print("Rozpoczyna się walka do ostatniej krwi!")
-    print(f"Twoje zdrowie: {gracz.statystyki['zdrowie']}, Zdrowie przeciwnika: {przeciwnik.statystyki['zdrowie']}")
-    while przeciwnik.statystyki['zdrowie'] > 0 and gracz.statystyki['zdrowie'] >0 :
-        atak_gracza(gracz, przeciwnik)
-        if przeciwnik.statystyki['zdrowie'] <= 0:
-            print("Gratulację, wygrałeś walkę")
-            gracz.aktualizacja_statystyk_po_wygranej()
-            aktualizacja_statystyk_przeciwnika_po_walce(gracz, przeciwnik)
-            time.sleep(2)
-            regeneracja_zdrowia(gracz,"Wygrana")
+            self.przeciwnik.aktualizacja_statystyk_przeciwnika(self.gracz)
             return
-        time.sleep(2)
-        atak_przeciwnika(gracz, przeciwnik)
-        if gracz.statystyki['zdrowie'] <= 0:
-            print("Zostałeś pokonany")
-            przeciwnik.statystyki['zdrowie'] = 0.7 * przeciwnik.statystyki['max_zdrowie']
-            gracz.statystyki["przegrane"] += 1
-            time.sleep(2)
-            regeneracja_zdrowia(gracz,"Przegrana")
-            return
-        time.sleep(2)
-
-
 def liczenie_obrazen(atakujacy, broniacy, klasa=None):
     moc = atakujacy.statystyki["moc"]
     zrecznosc = atakujacy.statystyki["zrecznosc"]
@@ -69,58 +107,3 @@ def liczenie_obrazen(atakujacy, broniacy, klasa=None):
         (wspolczynniki["obrona"] * obrona)
     ) * mnoznik
     return max(1, round(obrazenia))
-
-def atak_gracza(gracz, przeciwnik):
-    print("Wykonujesz atak")
-    obrazenia = liczenie_obrazen(gracz,przeciwnik,gracz.klasa)
-    przeciwnik.statystyki['zdrowie'] -= obrazenia
-    print(f"Gracz zadaje {obrazenia} obrażeń. Zdrowie przeciwnika: {przeciwnik.statystyki['zdrowie']}")
-    return obrazenia
-def atak_przeciwnika(gracz, przeciwnik):
-    print("Przeciwnik wykonuje atak")
-    obrazenia = liczenie_obrazen(przeciwnik, gracz)
-    gracz.statystyki['zdrowie'] -= obrazenia
-    print(f"Przeciwnik zadaje {obrazenia} obrażeń. Zdrowie gracza: {gracz.statystyki['zdrowie']}")
-    return obrazenia
-def regeneracja_zdrowia(gracz, wynik):
-    max_zdrowie = gracz.statystyki['max_zdrowie']
-    if wynik == "Wygrana":
-        if max_zdrowie == gracz.statystyki['zdrowie']:
-            return
-        koszt_uzdrowienie = random.randint(5, 25)
-        print(f"Wygrałeś walkę, lecz ucierpoałeś, Twoje aktualne zdrowie wynosi {gracz.statystyki['zdrowie']}")
-        print("Koszt Twojego uzdrowienia wynosi: ",koszt_uzdrowienie)
-        if gracz.statystyki["kasa"] < koszt_uzdrowienie:
-            print("Nie stać Ciebie na uleczenie!")
-            return
-        while True:
-            decyzja = input("Czy chcesz zregenerować zdrowie? (tak/nie) ").lower()
-            if decyzja == "tak":
-                gracz.statystyki['kasa'] -= koszt_uzdrowienie
-                gracz.statystyki['zdrowie'] = max_zdrowie
-                print("Zostałeś wyleczony")
-                break
-            elif decyzja == "nie":
-                print("Twoje zdrowie nie zostało zregenerowane")
-                break
-            else:
-                print("Proszę wybrać tak lub nie")
-    elif wynik == "Przegrana":
-        koszt_uzdrowienie = random.randint(25, 75)
-        if gracz.statystyki["kasa"] < koszt_uzdrowienie:
-            print("Nie stać Ciebie na uleczenie. Game Over!")
-            exit()
-        else:
-            gracz.statystyki['kasa'] -= koszt_uzdrowienie
-            gracz.statystyki['zdrowie'] = max_zdrowie
-            print("Zostałeś wyleczony, z Twojego konta pobrano", koszt_uzdrowienie, "monet Twoje saldo to:",
-          gracz.statystyki["kasa"])
-            return
-
-def aktualizacja_statystyk_przeciwnika_po_walce(gracz, przeciwnik):
-    przeciwnik_to_boss = isinstance(przeciwnik, Boss)
-    if przeciwnik_to_boss:
-        return
-    else:
-        przeciwnik.aktualizacja_statystyk_przeciwnika(gracz)
-        return

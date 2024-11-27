@@ -1,5 +1,5 @@
 import time
-from arena import arena
+from arena import Walka
 from sklep import rozdzki, miecze, zbroje, kusze
 
 def przedmowa():
@@ -85,3 +85,23 @@ def sklep(gracz):
                 print("Podano nieprawidłową wartość! Wybierz wartość od 1 do 5")
         except ValueError:
             print("Należy wprowadzić liczbę")
+def arena(gracz, przeciwnik, boss):
+    print("Witaj na arenie! Gdzie walka toczy się do ostatniej krwi")
+    while True:
+        decyzja = input("Czy chcesz podjąć walkę(tak/nie) ").lower()
+        if decyzja == "tak":
+            if (gracz.statystyki['wygrane'] % 5 != 0 or gracz.statystyki['wygrane'] == 0):
+                print("Walczysz z przeciwnikiem")
+                walka = Walka(gracz, przeciwnik)
+                walka.fight()
+                break
+            else:
+                print("Walczusz z bossem")
+                boss.aktualizacja_statystyk_bossa(gracz)
+                walka = Walka(gracz,boss)
+                walka.fight()
+                break
+        elif decyzja == "nie":
+            return
+        else:
+            print("Należy wybrac tak lub nie")

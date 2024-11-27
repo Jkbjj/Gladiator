@@ -1,4 +1,4 @@
-from interfejs import przedmowa, imie, klasa, menu
+from interfejs import przedmowa, imie, klasa, menu, arena
 from gracz import Gracz
 from przeciwnik import Przeciwnik, Boss
 
